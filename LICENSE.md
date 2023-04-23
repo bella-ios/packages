@@ -1,0 +1,13 @@
+Proprietary Licensing
+
+Copyright (c) 2023-present, Bella iOS <bellaiospa@gmail.com>
+
+Owner and Author, Hesham Yassin <heshamgyassin@gmail.com>
+
+1 NOTICE. All information contained herein is, and remains the property of Bella iOS and its authors and contributors, if any.  The intellectual and technical concepts contained herein are proprietary to Bella iOS, including code in production or code in development. Dissemination of this information or reproduction of this material is strictly forbidden unless prior written permission is obtained from Bella iOS authors.
+
+2 SCOPE. The receipt or possession of the source code and/or any parts thereof does not convey or imply any right to use them for any purpose other than the purpose for which they were provided to you. The software is provided "AS IS", without warranty of any kind, express or implied, including but not limited to: (i) the warranties of merchantability, (ii) fitness for a particular purpose and (iii) non infringement. In no event shall the authors or copyright holders be liable for any claim, damages or other liability, whether in an action of contract, tort or otherwise, arising from, out of or in connection with the software or the use or other dealings in the software.
+
+3 USER RESTRICTION. Licensee agrees not to copy and distribute the Licensed Software, in whole or in part, for internal use without paying Licensor the applicable additional fees, except (i) for making a reasonable research objective; or (ii) as expressly authorized by Licensor in writing; or (iii) for making a reasonable number of copies of the Documentation supplied to Licensee by Licensor inelectronicform. Licensee shall reproduce and affix all copyright and other proprietary rights notices appearing in or on the Licensed Software, including the notices of all third party suppliers and all those included in any Third Party Software, as defined below in all such copies thereof. Licensee agrees not to Create derivative works, translate, disassemble, recompile or reverse engineer any Licensed Software or attempt to do so (except to the extent applicable law specifically permits such activity). Licensee agrees not to utilize for itself, or permit any third party to utilize, any software application program created, in whole or in part, utilizing any Licensed Software without a valid and properly granted Deployment Product License. Licensee agree not to use the Licensed Software in a manner other than as specifically permitted in this License Agreement.
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
