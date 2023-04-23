@@ -65,7 +65,7 @@ docker run --rm --name bella-ios --privileged -tidp 1337:1337 --expose=1337 bell
 
 ## Author
 
-**Hesham Yasein** ([heshamgyassin@gmail.com](mailto: heshamgyassin@gmail.com))
+**Hesham Yasein** <heshamgyassin@gmail.com>
 
 ## License
 
