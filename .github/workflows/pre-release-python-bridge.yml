@@ -1,6 +1,11 @@
 name: Pre-release Python bridge
 
 on: workflow_dispatch
+inputs:
+  branch:
+    description: 'Enter the build branch'
+    required: true
+    default: 'main'
 
 env:
   PIPENV_PIPFILE: bridges/python/src
@@ -26,7 +31,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           repository: ${{ env.REPOSITORY_NAME }}
-          ref: refs/heads/main
+          ref: refs/heads/${{ github.event.inputs.branch }}
           token: ${{ secrets.GH_PAT }}
 
       - name: Install Python
@@ -65,9 +70,65 @@ jobs:
         with:
           path: bridges/python/dist/*.zip
 
+  build-aarch64:
+    name: Build AARCH64
+    permissions:
+      packages: write
+      contents: write
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-20.04, macos-latest]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v3
+        with:
+          repository: ${{ env.REPOSITORY_NAME }}
+          ref: refs/heads/${{ github.event.inputs.branch }}
+          token: ${{ secrets.GH_PAT }}
+
+      - name: Install Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.9.10
+
+      - name: Install Pipenv
+        run: pip install --upgrade pip && pip install pipenv==2022.7.24
+
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: lts/*
+      
+      - name: Build on AARCH64
+        uses: uraimo/run-on-arch-action@v2
+        id: runcmd
+        with:
+          arch: aarch64
+          distro: ubuntu20.04
+          githubToken: ${{ secrets.GH_PAT }}
+          run: |
+            echo "Install Pipenv"
+            pip install --upgrade pip && pip install pipenv==2022.7.24
+            echo "Install core"
+            npm install
+            echo "Set up Python bridge"
+            npm run setup:python-bridge
+            echo "Build Python bridge"
+            npm run build:python-bridge
+
+      - name: Upload Python bridge
+        uses: actions/upload-artifact@v3
+        with:
+          path: bridges/python/dist/*.zip
+
   draft-release:
     name: Draft-release
-    needs: [build]
+    needs: [build, build-aarch64]
     runs-on: ubuntu-20.04
     permissions:
       packages: write
@@ -79,7 +140,8 @@ jobs:
         uses: actions/checkout@v3
         with:
           repository: ${{ env.REPOSITORY_NAME }}
-          token: ${{ secrets.GITHUB_TOKEN }}
+          ref: refs/heads/${{ github.event.inputs.branch }}
+          token: ${{ secrets.GH_PAT }}
 
       - name: Install Python
         uses: actions/setup-python@v4
