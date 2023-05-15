@@ -85,13 +85,6 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-      - name: Clone repository
-        uses: actions/checkout@v3
-        with:
-          repository: ${{ env.REPOSITORY_NAME }}
-          ref: refs/heads/${{ github.event.inputs.branch }}
-          token: ${{ secrets.GH_PAT }}
-
       - name: Install Python
         uses: actions/setup-python@v4
         with:
@@ -119,10 +112,10 @@ jobs:
           distro: ubuntu20.04
           githubToken: ${{ secrets.GH_PAT }}
           run: |
-            echo "Install Pipenv"
-            pip install --upgrade pip && pip install pipenv==2022.7.24
-            echo "Install core"
-            npm install
+            echo "Cloning repository"
+            git clone -b ${{ github.event.inputs.branch }} https://${{ secrets.GH_PAT }}@github.com/${{ env.REPOSITORY_NAME }}.git
+            echo "Building Dockerfile"
+            DOCKER_BUILDKIT=1 docker build .
             echo "Set up Python bridge"
             npm run setup:python-bridge
             echo "Build Python bridge"
