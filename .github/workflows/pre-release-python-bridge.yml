@@ -97,8 +97,14 @@ jobs:
         with:
           python-version: 3.9.10
 
-      - name: Install Pipenv
-        run: pip install --upgrade pip && pip install pipenv==2022.7.24
+      - name: Set Python bridge version
+        working-directory: bridges/python/src
+        run: |
+          echo "PYTHON_BRIDGE_VERSION=$(python -c "from version import __version__; print(__version__)")" >> $GITHUB_ENV
+
+      - name: Display Python bridge version
+        run: |
+          echo "Python bridge version: ${{ env.PYTHON_BRIDGE_VERSION }}"
 
       - name: Install Node.js
         uses: actions/setup-node@v3
