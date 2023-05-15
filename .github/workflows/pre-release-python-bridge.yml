@@ -27,7 +27,7 @@ jobs:
         with:
           repository: ${{ env.REPOSITORY_NAME }}
           ref: refs/heads/main
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.GH_PAT }}
 
       - name: Install Python
         uses: actions/setup-python@v4
