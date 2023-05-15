@@ -1,11 +1,12 @@
 name: Pre-release Python bridge
 
-on: workflow_dispatch
-inputs:
-  branch:
-    description: 'Enter the build branch'
-    required: true
-    default: 'main'
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Enter the build branch'
+        required: true
+        default: 'main'
 
 env:
   PIPENV_PIPFILE: bridges/python/src
