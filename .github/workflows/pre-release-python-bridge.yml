@@ -226,4 +226,4 @@ jobs:
           draft: true
           prerelease: false
           release_name: Python Bridge ${{ env.PYTHON_BRIDGE_VERSION }}
-          files: bridges/python/dist/artifact/*.zip
+          files: bridges/python/dist/*.zip

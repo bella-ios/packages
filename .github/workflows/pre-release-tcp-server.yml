@@ -226,4 +226,4 @@ jobs:
           draft: true
           prerelease: false
           release_name: TCP Server ${{ env.TCP_SERVER_VERSION }}
-          files: tcp_server/dist/artifact/*.zip
+          files: tcp_server/dist/*.zip
