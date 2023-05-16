@@ -40,7 +40,7 @@ jobs:
         name: Build linux ARM64
         id: buildarm64
         with:
-          arch: armv7
+          arch: arm64v8
           distro: ubuntu20.04
           githubToken: ${{ secrets.GH_PAT }}
           shell: /bin/bash
@@ -55,7 +55,7 @@ jobs:
           run: |    
             cd /home
 
-            wget https://www.python.org/ftp/python/3.9.10/Python-3.9.10.tgz && tar -xvf Python-3.9.10.tgz
+            wget --no-check-certificate https://www.python.org/ftp/python/3.9.10/Python-3.9.10.tgz && tar -xvf Python-3.9.10.tgz
 
             cd /home/docker/Python-3.9.10
 
@@ -66,7 +66,7 @@ jobs:
             export NVM_DIR=/home/.nvm
             export NODE_VERSION=v18.16.0
 
-            curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.3/install.sh | bash
+            curl -o- --no-check-certificate https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.3/install.sh | bash
             /bin/bash -c "source $NVM_DIR/nvm.sh && nvm install $NODE_VERSION && nvm use --delete-prefix $NODE_VERSION"
 
             apt-get update && apt-get upgrade -y && apt-get autoremove -y && rm -rf /var/lib/apt/lists/*
