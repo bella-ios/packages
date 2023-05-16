@@ -220,7 +220,7 @@ jobs:
         id: create_release
         uses: marvinpinto/action-automatic-releases@latest
         with:
-          token: ${{ secrets.GH_PAT }}
+          repo_token: ${{ secrets.GH_PAT }}
           automatic_release_tag: tcp-server_v${{ env.TCP_SERVER_VERSION }}
           draft: true
           prerelease: false
