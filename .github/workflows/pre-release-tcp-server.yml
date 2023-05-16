@@ -219,11 +219,11 @@ jobs:
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
         with:
-          tag_name: tcp-server_v${{ env.TCP_SERVER_VERSION }}
+          token: ${{ secrets.GH_PAT }}
+          automatic_release_tag: tcp-server_v${{ env.TCP_SERVER_VERSION }}
           draft: true
           prerelease: false
-          release_name: TCP Server ${{ env.TCP_SERVER_VERSION }}
-          files: tcp_server/dist/*.zip
+          title: TCP Server ${{ env.TCP_SERVER_VERSION }}
+          files: |
+            tcp_server/dist/artifact/*.zip
