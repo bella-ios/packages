@@ -218,12 +218,12 @@ jobs:
 
       - name: Create Release
         id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: marvinpinto/action-automatic-releases@latest
         with:
-          tag_name: python-bridge_v${{ env.PYTHON_BRIDGE_VERSION }}
+          repo_token: ${{ secrets.GH_PAT }}
+          automatic_release_tag: python-bridge_v${{ env.PYTHON_BRIDGE_VERSION }}
           draft: true
           prerelease: false
-          release_name: Python Bridge ${{ env.PYTHON_BRIDGE_VERSION }}
-          files: bridges/python/dist/*.zip
+          title: Python Bridge ${{ env.PYTHON_BRIDGE_VERSION }}
+          files: |
+            bridges/python/dist/artifact/*.zip
