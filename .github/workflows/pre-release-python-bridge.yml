@@ -80,7 +80,7 @@ jobs:
     strategy:
       fail-fast: false
 
-    runs-on: [self-hosted, linux-20.04, ARM64]
+    runs-on: [self-hosted, linux-18.04, ARM64]
 
     steps:
       - name: Clone repository
