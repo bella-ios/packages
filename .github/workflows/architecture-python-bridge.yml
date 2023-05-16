@@ -40,7 +40,7 @@ jobs:
         name: Build linux ARM64
         id: buildarm64
         with:
-          arch: arm64
+          arch: aarch64
           distro: ubuntu20.04
           githubToken: ${{ secrets.GH_PAT }}
           shell: /bin/bash
