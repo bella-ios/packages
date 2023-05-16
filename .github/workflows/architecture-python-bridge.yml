@@ -23,7 +23,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-20.04, macos-latest]
+        os: [ubuntu-18.04]
 
     runs-on: ${{ matrix.os }}
     timeout-minutes: 30
@@ -40,53 +40,33 @@ jobs:
         name: Build linux ARM64
         id: buildarm64
         with:
-          arch: armv8
+          arch: armv7
           distro: ubuntu20.04
           githubToken: ${{ secrets.GH_PAT }}
-          run: |
-            uname -a
-            echo ::set-output name=uname::$(uname -a)
-          
-  draft-release:
-    name: Draft-release
-    needs: [build]
-    runs-on: ubuntu-20.04
-    permissions:
-      packages: write
-      contents: write
-      pull-requests: write
+          shell: /bin/bash
+          install: |
+            apt-get update && apt-get install --yes -q --no-install-recommends \
+            apt-transport-https build-essential ca-certificates curl git wget openssl \
+            ssh openssh-server sudo software-properties-common automake make g++ \
+            ncurses-dev nvi pkg-config unzip wavpack zip \
+            libtool libssl-dev libz-dev zlib1g-dev libbz2-dev libreadline-dev \
+            libsqlite3-dev llvm libncurses5-dev xz-utils tk-dev libxml2-dev libxmlsec1-dev \
+            libffi-dev liblzma-dev libgdbm-dev libnss3-dev libc6-dev patchelf
+          run: |    
+            cd /home
 
-    steps:
-      - name: Clone repository
-        uses: actions/checkout@v3
-        with:
-          repository: ${{ env.REPOSITORY_NAME }}
-          ref: refs/heads/${{ github.event.inputs.branch }}
-          token: ${{ secrets.GH_PAT }}
+            wget https://www.python.org/ftp/python/3.9.10/Python-3.9.10.tgz && tar -xvf Python-3.9.10.tgz
 
-      - name: Install Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: 3.9.10
+            cd /home/docker/Python-3.9.10
 
-      - name: Set Python bridge version
-        working-directory: bridges/python/src
-        run: |
-          echo "PYTHON_BRIDGE_VERSION=$(python -c "from version import __version__; print(__version__)")" >> $GITHUB_ENV
+            /bin/bash -c "./configure --enable-optimizations && sudo make install"
 
-      - name: Download Python bridge
-        uses: actions/download-artifact@v3
-        with:
-          path: bridges/python/dist/
+            pip3 install piping && pip3 install pipenv==2022.7.24
 
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: python-bridge_v${{ env.PYTHON_BRIDGE_VERSION }}
-          draft: true
-          prerelease: false
-          release_name: Python Bridge ${{ env.PYTHON_BRIDGE_VERSION }}
-          files: bridges/python/dist/artifact/*.zip
+            export NVM_DIR=/home/.nvm
+            export NODE_VERSION=v18.16.0
+
+            curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.3/install.sh | bash
+            /bin/bash -c "source $NVM_DIR/nvm.sh && nvm install $NODE_VERSION && nvm use --delete-prefix $NODE_VERSION"
+
+            apt-get update && apt-get upgrade -y && apt-get autoremove -y && rm -rf /var/lib/apt/lists/*
