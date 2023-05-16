@@ -71,7 +71,7 @@ jobs:
         with:
           path: bridges/python/dist/*.zip
 
-  build-aarch64:
+  build-linux-ARM64:
     name: Build AARCH64
     permissions:
       packages: write
@@ -79,10 +79,8 @@ jobs:
 
     strategy:
       fail-fast: false
-      matrix:
-        os: [ubuntu-20.04, macos-latest]
 
-    runs-on: ${{ matrix.os }}
+    runs-on: [self-hosted, linux-20.04, ARM64]
 
     steps:
       - name: Clone repository
@@ -97,6 +95,14 @@ jobs:
         with:
           python-version: 3.9.10
 
+      - name: Install Pipenv
+        run: pip install --upgrade pip && pip install pipenv==2022.7.24
+
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: lts/*
+
       - name: Set Python bridge version
         working-directory: bridges/python/src
         run: |
@@ -106,27 +112,14 @@ jobs:
         run: |
           echo "Python bridge version: ${{ env.PYTHON_BRIDGE_VERSION }}"
 
-      - name: Install Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: lts/*
-      
-      - name: Build on AARCH64
-        uses: uraimo/run-on-arch-action@v2
-        id: runcmd
-        with:
-          arch: aarch64
-          distro: ubuntu20.04
-          githubToken: ${{ secrets.GH_PAT }}
-          run: |
-            echo "Cloning repository"
-            git clone -b ${{ github.event.inputs.branch }} https://${{ secrets.GH_PAT }}@github.com/${{ env.REPOSITORY_NAME }}.git
-            echo "Building Dockerfile"
-            DOCKER_BUILDKIT=1 docker build .
-            echo "Set up Python bridge"
-            npm run setup:python-bridge
-            echo "Build Python bridge"
-            npm run build:python-bridge
+      - name: Install core
+        run: npm install || true
+
+      - name: Set up Python bridge
+        run: npm run setup:python-bridge
+
+      - name: Build Python bridge
+        run: npm run build:python-bridge
 
       - name: Upload Python bridge
         uses: actions/upload-artifact@v3
@@ -135,7 +128,7 @@ jobs:
 
   draft-release:
     name: Draft-release
-    needs: [build, build-aarch64]
+    needs: [build, build-linux-ARM64]
     runs-on: ubuntu-20.04
     permissions:
       packages: write
