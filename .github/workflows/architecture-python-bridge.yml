@@ -1,0 +1,92 @@
+name: Pre-release Python bridge
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Enter the build branch'
+        required: true
+        default: 'main'
+
+env:
+  PIPENV_PIPFILE: bridges/python/src
+  PIPENV_VENV_IN_PROJECT: true
+  REPOSITORY_NAME: bella-ios/bella
+
+jobs:
+  build:
+    name: Build
+    permissions:
+      packages: write
+      contents: write
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-20.04, macos-latest]
+
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v3
+        with:
+          repository: ${{ env.REPOSITORY_NAME }}
+          ref: refs/heads/${{ github.event.inputs.branch }}
+          token: ${{ secrets.GH_PAT }}
+
+      - uses: uraimo/run-on-arch-action@v2
+        name: Build linux ARM64
+        id: buildarm64
+        with:
+          arch: armv8
+          distro: ubuntu20.04
+          githubToken: ${{ secrets.GH_PAT }}
+          run: |
+            uname -a
+            echo ::set-output name=uname::$(uname -a)
+          
+  draft-release:
+    name: Draft-release
+    needs: [build]
+    runs-on: ubuntu-20.04
+    permissions:
+      packages: write
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v3
+        with:
+          repository: ${{ env.REPOSITORY_NAME }}
+          ref: refs/heads/${{ github.event.inputs.branch }}
+          token: ${{ secrets.GH_PAT }}
+
+      - name: Install Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.9.10
+
+      - name: Set Python bridge version
+        working-directory: bridges/python/src
+        run: |
+          echo "PYTHON_BRIDGE_VERSION=$(python -c "from version import __version__; print(__version__)")" >> $GITHUB_ENV
+
+      - name: Download Python bridge
+        uses: actions/download-artifact@v3
+        with:
+          path: bridges/python/dist/
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: python-bridge_v${{ env.PYTHON_BRIDGE_VERSION }}
+          draft: true
+          prerelease: false
+          release_name: Python Bridge ${{ env.PYTHON_BRIDGE_VERSION }}
+          files: bridges/python/dist/artifact/*.zip

@@ -186,7 +186,7 @@ jobs:
           
   draft-release:
     name: Draft-release
-    needs: [build, build-linux-ARM64, build-macos-ARM64]
+    needs: [build]
     runs-on: ubuntu-20.04
     permissions:
       packages: write
