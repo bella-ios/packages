@@ -26,6 +26,7 @@ jobs:
         os: [ubuntu-20.04, macos-latest, windows-latest]
 
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
 
     steps:
       - name: Clone repository
@@ -72,7 +73,7 @@ jobs:
           path: bridges/python/dist/*.zip
 
   build-linux-ARM64:
-    name: Build AARCH64
+    name: Build Linux AARCH64
     permissions:
       packages: write
       contents: write
@@ -80,7 +81,8 @@ jobs:
     strategy:
       fail-fast: false
 
-    runs-on: [self-hosted, linux-18.04, ARM64]
+    runs-on: [self-hosted, linux-latest, ARM64]
+    timeout-minutes: 15
 
     steps:
       - name: Clone repository
@@ -126,9 +128,65 @@ jobs:
         with:
           path: bridges/python/dist/*.zip
 
+  build-macos-ARM64:
+    name: Build macOS AARCH64
+    permissions:
+      packages: write
+      contents: write
+
+    strategy:
+      fail-fast: false
+
+    runs-on: [self-hosted, macos-latest, ARM64]
+    timeout-minutes: 15
+
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v3
+        with:
+          repository: ${{ env.REPOSITORY_NAME }}
+          ref: refs/heads/${{ github.event.inputs.branch }}
+          token: ${{ secrets.GH_PAT }}
+
+      - name: Install Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.9.10
+
+      - name: Install Pipenv
+        run: pip install --upgrade pip && pip install pipenv==2022.7.24
+
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: lts/*
+
+      - name: Set Python bridge version
+        working-directory: bridges/python/src
+        run: |
+          echo "PYTHON_BRIDGE_VERSION=$(python -c "from version import __version__; print(__version__)")" >> $GITHUB_ENV
+
+      - name: Display Python bridge version
+        run: |
+          echo "Python bridge version: ${{ env.PYTHON_BRIDGE_VERSION }}"
+
+      - name: Install core
+        run: npm install || true
+
+      - name: Set up Python bridge
+        run: npm run setup:python-bridge
+
+      - name: Build Python bridge
+        run: npm run build:python-bridge
+
+      - name: Upload Python bridge
+        uses: actions/upload-artifact@v3
+        with:
+          path: bridges/python/dist/*.zip
+          
   draft-release:
     name: Draft-release
-    needs: [build, build-linux-ARM64]
+    needs: [build, build-linux-ARM64, build-macos-ARM64]
     runs-on: ubuntu-20.04
     permissions:
       packages: write

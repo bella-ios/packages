@@ -1,11 +1,18 @@
 name: Pre-release TCP server
 
-on: workflow_dispatch
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Enter the build branch'
+        required: true
+        default: 'main'
 
 env:
   PIPENV_PIPFILE: tcp_server/src
   PIPENV_VENV_IN_PROJECT: true
-
+  REPOSITORY_NAME: bella-ios/bella
+  
 jobs:
   build:
     name: Build
@@ -19,6 +26,7 @@ jobs:
         os: [ubuntu-20.04, macos-latest, windows-latest]
 
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
 
     steps:
       - name: Clone repository
@@ -64,9 +72,121 @@ jobs:
         with:
           path: tcp_server/dist/*.zip
 
+  build-linux-ARM64:
+    name: Build Linux AARCH64
+    permissions:
+      packages: write
+      contents: write
+
+    strategy:
+      fail-fast: false
+
+    runs-on: [self-hosted, linux-latest, ARM64]
+    timeout-minutes: 15
+
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v3
+        with:
+          repository: ${{ env.REPOSITORY_NAME }}
+          ref: refs/main
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.9.10
+
+      - name: Install Pipenv
+        run: pip install --upgrade pip && pip install pipenv==2022.7.24
+
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: lts/*
+
+      - name: Set TCP server version
+        working-directory: tcp_server/src
+        run: |
+          echo "TCP_SERVER_VERSION=$(python -c "from version import __version__; print(__version__)")" >> $GITHUB_ENV
+
+      - name: Display TCP server version
+        run: |
+          echo "TCP server version: ${{ env.TCP_SERVER_VERSION }}"
+
+      - name: Install core
+        run: npm install || true
+
+      - name: Set up TCP server
+        run: npm run setup:tcp-server
+
+      - name: Build TCP server
+        run: npm run build:tcp-server
+
+      - name: Upload TCP server
+        uses: actions/upload-artifact@v3
+        with:
+          path: tcp_server/dist/*.zip
+
+  build-macos-ARM64:
+    name: Build macOS AARCH64
+    permissions:
+      packages: write
+      contents: write
+
+    strategy:
+      fail-fast: false
+
+    runs-on: [self-hosted, macos-latest, ARM64]    
+    timeout-minutes: 15
+
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v3
+        with:
+          repository: ${{ env.REPOSITORY_NAME }}
+          ref: refs/main
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.9.10
+
+      - name: Install Pipenv
+        run: pip install --upgrade pip && pip install pipenv==2022.7.24
+
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: lts/*
+
+      - name: Set TCP server version
+        working-directory: tcp_server/src
+        run: |
+          echo "TCP_SERVER_VERSION=$(python -c "from version import __version__; print(__version__)")" >> $GITHUB_ENV
+
+      - name: Display TCP server version
+        run: |
+          echo "TCP server version: ${{ env.TCP_SERVER_VERSION }}"
+
+      - name: Install core
+        run: npm install || true
+
+      - name: Set up TCP server
+        run: npm run setup:tcp-server
+
+      - name: Build TCP server
+        run: npm run build:tcp-server
+
+      - name: Upload TCP server
+        uses: actions/upload-artifact@v3
+        with:
+          path: tcp_server/dist/*.zip    
+
   draft-release:
     name: Draft-release
-    needs: [build]
+    needs: [build, build-linux-ARM64, build-macos-ARM64]
     runs-on: ubuntu-20.04
     permissions:
       packages: write
