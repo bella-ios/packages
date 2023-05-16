@@ -34,7 +34,7 @@ jobs:
         with:
           repository: ${{ env.REPOSITORY_NAME }}
           ref: refs/main
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.GH_PAT }}
 
       - name: Install Python
         uses: actions/setup-python@v4
@@ -72,117 +72,117 @@ jobs:
         with:
           path: tcp_server/dist/*.zip
 
-  build-linux-ARM64:
-    name: Build Linux AARCH64
-    permissions:
-      packages: write
-      contents: write
+  # build-linux-ARM64:
+  #   name: Build Linux AARCH64
+  #   permissions:
+  #     packages: write
+  #     contents: write
 
-    strategy:
-      fail-fast: false
+  #   strategy:
+  #     fail-fast: false
 
-    runs-on: [self-hosted, linux-latest, ARM64]
-    timeout-minutes: 15
+  #   runs-on: [self-hosted, linux-latest, ARM64]
+  #   timeout-minutes: 15
 
-    steps:
-      - name: Clone repository
-        uses: actions/checkout@v3
-        with:
-          repository: ${{ env.REPOSITORY_NAME }}
-          ref: refs/main
-          token: ${{ secrets.GITHUB_TOKEN }}
+  #   steps:
+  #     - name: Clone repository
+  #       uses: actions/checkout@v3
+  #       with:
+  #         repository: ${{ env.REPOSITORY_NAME }}
+  #         ref: refs/main
+  #         token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Install Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: 3.9.10
+  #     - name: Install Python
+  #       uses: actions/setup-python@v4
+  #       with:
+  #         python-version: 3.9.10
 
-      - name: Install Pipenv
-        run: pip install --upgrade pip && pip install pipenv==2022.7.24
+  #     - name: Install Pipenv
+  #       run: pip install --upgrade pip && pip install pipenv==2022.7.24
 
-      - name: Install Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: lts/*
+  #     - name: Install Node.js
+  #       uses: actions/setup-node@v3
+  #       with:
+  #         node-version: lts/*
 
-      - name: Set TCP server version
-        working-directory: tcp_server/src
-        run: |
-          echo "TCP_SERVER_VERSION=$(python -c "from version import __version__; print(__version__)")" >> $GITHUB_ENV
+  #     - name: Set TCP server version
+  #       working-directory: tcp_server/src
+  #       run: |
+  #         echo "TCP_SERVER_VERSION=$(python -c "from version import __version__; print(__version__)")" >> $GITHUB_ENV
 
-      - name: Display TCP server version
-        run: |
-          echo "TCP server version: ${{ env.TCP_SERVER_VERSION }}"
+  #     - name: Display TCP server version
+  #       run: |
+  #         echo "TCP server version: ${{ env.TCP_SERVER_VERSION }}"
 
-      - name: Install core
-        run: npm install || true
+  #     - name: Install core
+  #       run: npm install || true
 
-      - name: Set up TCP server
-        run: npm run setup:tcp-server
+  #     - name: Set up TCP server
+  #       run: npm run setup:tcp-server
 
-      - name: Build TCP server
-        run: npm run build:tcp-server
+  #     - name: Build TCP server
+  #       run: npm run build:tcp-server
 
-      - name: Upload TCP server
-        uses: actions/upload-artifact@v3
-        with:
-          path: tcp_server/dist/*.zip
+  #     - name: Upload TCP server
+  #       uses: actions/upload-artifact@v3
+  #       with:
+  #         path: tcp_server/dist/*.zip
 
-  build-macos-ARM64:
-    name: Build macOS AARCH64
-    permissions:
-      packages: write
-      contents: write
+  # build-macos-ARM64:
+  #   name: Build macOS AARCH64
+  #   permissions:
+  #     packages: write
+  #     contents: write
 
-    strategy:
-      fail-fast: false
+  #   strategy:
+  #     fail-fast: false
 
-    runs-on: [self-hosted, macos-latest, ARM64]    
-    timeout-minutes: 15
+  #   runs-on: [self-hosted, macos-latest, ARM64]    
+  #   timeout-minutes: 15
 
-    steps:
-      - name: Clone repository
-        uses: actions/checkout@v3
-        with:
-          repository: ${{ env.REPOSITORY_NAME }}
-          ref: refs/main
-          token: ${{ secrets.GITHUB_TOKEN }}
+  #   steps:
+  #     - name: Clone repository
+  #       uses: actions/checkout@v3
+  #       with:
+  #         repository: ${{ env.REPOSITORY_NAME }}
+  #         ref: refs/main
+  #         token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Install Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: 3.9.10
+  #     - name: Install Python
+  #       uses: actions/setup-python@v4
+  #       with:
+  #         python-version: 3.9.10
 
-      - name: Install Pipenv
-        run: pip install --upgrade pip && pip install pipenv==2022.7.24
+  #     - name: Install Pipenv
+  #       run: pip install --upgrade pip && pip install pipenv==2022.7.24
 
-      - name: Install Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: lts/*
+  #     - name: Install Node.js
+  #       uses: actions/setup-node@v3
+  #       with:
+  #         node-version: lts/*
 
-      - name: Set TCP server version
-        working-directory: tcp_server/src
-        run: |
-          echo "TCP_SERVER_VERSION=$(python -c "from version import __version__; print(__version__)")" >> $GITHUB_ENV
+  #     - name: Set TCP server version
+  #       working-directory: tcp_server/src
+  #       run: |
+  #         echo "TCP_SERVER_VERSION=$(python -c "from version import __version__; print(__version__)")" >> $GITHUB_ENV
 
-      - name: Display TCP server version
-        run: |
-          echo "TCP server version: ${{ env.TCP_SERVER_VERSION }}"
+  #     - name: Display TCP server version
+  #       run: |
+  #         echo "TCP server version: ${{ env.TCP_SERVER_VERSION }}"
 
-      - name: Install core
-        run: npm install || true
+  #     - name: Install core
+  #       run: npm install || true
 
-      - name: Set up TCP server
-        run: npm run setup:tcp-server
+  #     - name: Set up TCP server
+  #       run: npm run setup:tcp-server
 
-      - name: Build TCP server
-        run: npm run build:tcp-server
+  #     - name: Build TCP server
+  #       run: npm run build:tcp-server
 
-      - name: Upload TCP server
-        uses: actions/upload-artifact@v3
-        with:
-          path: tcp_server/dist/*.zip    
+  #     - name: Upload TCP server
+  #       uses: actions/upload-artifact@v3
+  #       with:
+  #         path: tcp_server/dist/*.zip
 
   draft-release:
     name: Draft-release
@@ -198,7 +198,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           repository: ${{ env.REPOSITORY_NAME }}
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.GH_PAT }}
 
       - name: Install Python
         uses: actions/setup-python@v4
@@ -219,7 +219,7 @@ jobs:
         id: create_release
         uses: actions/create-release@v1
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
         with:
           tag_name: tcp-server_v${{ env.TCP_SERVER_VERSION }}
           draft: true
