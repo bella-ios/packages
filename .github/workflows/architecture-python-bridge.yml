@@ -23,10 +23,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-20.04]
+        os: [ubuntu-20.04, macos-latest]
 
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 30
 
     steps:
       - name: Clone repository
@@ -36,37 +35,23 @@ jobs:
           ref: refs/heads/${{ github.event.inputs.branch }}
           token: ${{ secrets.GH_PAT }}
 
-      - uses: uraimo/run-on-arch-action@v2
-        name: Build linux ARM64
-        id: buildarm64
+      - name: Set up QEMU
+        if: matrix.platforms == 'linux/arm64'
+        uses: docker/setup-qemu-action@v2
         with:
-          arch: aarch64
-          distro: ubuntu20.04
-          githubToken: ${{ secrets.GH_PAT }}
-          shell: /bin/bash
-          install: |
-            apt-get update && apt-get install --yes -q --no-install-recommends \
-            apt-transport-https build-essential ca-certificates curl git wget openssl \
-            ssh openssh-server sudo software-properties-common automake make g++ \
-            ncurses-dev nvi pkg-config unzip wavpack zip \
-            libtool libssl-dev libz-dev zlib1g-dev libbz2-dev libreadline-dev \
-            libsqlite3-dev llvm libncurses5-dev xz-utils tk-dev libxml2-dev libxmlsec1-dev \
-            libffi-dev liblzma-dev libgdbm-dev libnss3-dev libc6-dev patchelf
-          run: |    
-            cd /home
-
-            wget --no-check-certificate https://www.python.org/ftp/python/3.9.10/Python-3.9.10.tgz && tar -xvf Python-3.9.10.tgz
-
-            cd /home/docker/Python-3.9.10
-
-            /bin/bash -c "./configure --enable-optimizations && sudo make install"
-
-            pip3 install piping && pip3 install pipenv==2022.7.24
-
-            export NVM_DIR=/home/.nvm
-            export NODE_VERSION=v18.16.0
-
-            curl -o- --no-check-certificate https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.3/install.sh | bash
-            /bin/bash -c "source $NVM_DIR/nvm.sh && nvm install $NODE_VERSION && nvm use --delete-prefix $NODE_VERSION"
-
-            apt-get update && apt-get upgrade -y && apt-get autoremove -y && rm -rf /var/lib/apt/lists/*
+          platforms: arm64
+      
+      - name: Set up Docker Buildx
+        if: matrix.platforms == 'linux/arm64'
+        uses: docker/setup-buildx-action@v2
+        with:
+          version: latest
+          buildkitd-flags: --config /etc/buildkit/buildkitd.toml
+      
+      - name: Install Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.9.10
+          
+      - name: Show Platform
+        run: python3 -c "import platform; print(platform.machine()"
