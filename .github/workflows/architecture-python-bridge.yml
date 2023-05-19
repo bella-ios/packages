@@ -1,4 +1,4 @@
-name: Pre-release Python bridge
+name: ARM64 Bridge
 
 on:
   workflow_dispatch:
